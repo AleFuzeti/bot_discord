@@ -1,9 +1,11 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import axios from "axios";
 import dotenv from "dotenv";
+import express from "express";
+
 dotenv.config();
 
-
+// ===== Bot do Discord =====
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -24,7 +26,7 @@ async function getEuroRate() {
 
 client.on("guildMemberAdd", async (member) => {
   const guild = member.guild;
-  const total = guild.memberCount-1;
+  const total = guild.memberCount - 1;
 
   const euroRate = await getEuroRate();
   if (!euroRate) return;
@@ -40,3 +42,14 @@ Total de membros: **${total}**
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+// ===== Mini servidor para o Render não matar =====
+const app = express();
+app.get("/", (req, res) => {
+  res.send("Bot do Discord rodando 🚀");
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor web ativo na porta ${PORT}`);
+});
