@@ -7,16 +7,15 @@ dotenv.config();
 
 // ===== Bot do Discord =====
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers
-  ]
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 
-// Pega cotação do euro
+// Função para pegar cotação do euro
 async function getEuroRate() {
   try {
-    const response = await axios.get("https://economia.awesomeapi.com.br/json/last/EUR-BRL");
+    const response = await axios.get(
+      "https://economia.awesomeapi.com.br/json/last/EUR-BRL"
+    );
     return parseFloat(response.data.EURBRL.bid);
   } catch (error) {
     console.error("Erro ao buscar cotação:", error);
@@ -24,6 +23,7 @@ async function getEuroRate() {
   }
 }
 
+// Evento: novo membro entrou
 client.on("guildMemberAdd", async (member) => {
   const guild = member.guild;
   const total = guild.memberCount - 1;
@@ -43,7 +43,7 @@ Total de membros: **${total}**
 
 client.login(process.env.DISCORD_TOKEN);
 
-// ===== Mini servidor para o Render não matar =====
+// ===== Mini servidor para o Render não hibernar =====
 const app = express();
 app.get("/", (req, res) => {
   res.send("Bot do Discord rodando 🚀");
@@ -52,4 +52,16 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor web ativo na porta ${PORT}`);
+
+  // Ping periódico a cada 2 minutos
+  const url = "https://bot-discord-b7si.onrender.com";
+  // const url = "http://localhost:" + PORT; // Alterar para a URL do seu app no Render
+  setInterval(async () => {
+    try {
+      await axios.get(url);
+      console.log("Ping enviado 🟢", new Date().toLocaleString());
+    } catch (error) {
+      console.error("Erro ao enviar ping:", error.message);
+    }
+  }, 2 * 60 * 1000); // 2 minutos
 });
